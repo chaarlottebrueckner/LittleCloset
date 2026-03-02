@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import localforage from 'localforage'
+// toast imported but Toaster removed; calls will have no effect
 import toast from 'react-hot-toast'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
@@ -47,7 +48,6 @@ function App() {
     setKleidung(neu)
     await localforage.setItem('kleidung', neu)
     setFormOffen(false)
-    toast.success('Kleidungsstück hinzugefügt! 🌸')
   }
 
   async function handleDeleteKleidung(id) {
@@ -55,18 +55,22 @@ function App() {
       <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
         <span>Kleidungsstück wirklich löschen?</span>
         <div style={{display:'flex', gap:'8px'}}>
-          <button onClick={() => { toast.dismiss(t.id); toast.remove(t.id) }} style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Abbrechen</button>
-          <button onClick={async () => {
-            toast.dismiss(t.id)
-            toast.remove(t.id)
-            const neu = kleidung.filter(item => item.id !== id)
-            setKleidung(neu)
-            await localforage.setItem('kleidung', neu)
-            toast('Gelöscht', { icon: <Trash2 size={16} color="#e8789e" /> })
-          }} style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Löschen</button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}
+          >Abbrechen</button>
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id)
+              const neu = kleidung.filter(item => item.id !== id)
+              setKleidung(neu)
+              await localforage.setItem('kleidung', neu)
+            }}
+            style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}
+          >Löschen</button>
         </div>
       </div>
-    ), { duration: 10000 })
+    ))
   }
 
   async function handleSaveOutfit(outfit) {
@@ -74,7 +78,6 @@ function App() {
     setOutfits(neu)
     await localforage.setItem('outfits', neu)
     setOutfitBuilderOffen(false)
-    toast.success('Outfit gespeichert! ✨')
   }
 
   async function handleDeleteOutfit(id) {
@@ -82,18 +85,23 @@ function App() {
       <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
         <span>Outfit wirklich löschen?</span>
         <div style={{display:'flex', gap:'8px'}}>
-          <button onClick={() => { toast.dismiss(t.id); toast.remove(t.id) }} style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Abbrechen</button>
-          <button onClick={async () => {
-            toast.dismiss(t.id)
-            toast.remove(t.id)
-            const neu = kleidung.filter(item => item.id !== id)
-            setKleidung(neu)
-            await localforage.setItem('kleidung', neu)
-            toast('Gelöscht', { icon: <Trash2 size={16} color="#e8789e" /> })
-          }} style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Löschen</button>
+          <button
+            onClick={() => toast.dismiss(t.id)}
+            style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}
+          >Abbrechen</button>
+          <button
+            onClick={async () => {
+              toast.dismiss(t.id)
+              const neu = kleidung.filter(item => item.id !== id)
+              setKleidung(neu)
+              await localforage.setItem('kleidung', neu)
+              // no toast
+            }}
+            style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}
+          >Löschen</button>
         </div>
       </div>
-    ), { duration: 10000 })
+    ))
   }
 
   async function handleEditKleidung(item) {
@@ -101,7 +109,6 @@ function App() {
     setKleidung(neu)
     await localforage.setItem('kleidung', neu)
     setBearbeitenItem(null)
-    toast.success('Gespeichert! 🌸')
   }
 
   async function handleEditOutfit(outfit) {
@@ -109,24 +116,20 @@ function App() {
     setOutfits(neu)
     await localforage.setItem('outfits', neu)
     setBearbeitenOutfit(null)
-    toast.success('Outfit aktualisiert! ✨')
   }
 
   async function handleSaveKollektion() {
     if (!kollektionName.trim()) {
-      toast.error('Bitte einen Namen eingeben!')
       return
     }
     if (kollektionBearbeiten) {
       const neu = kollektionen.map(k => k.id === kollektionBearbeiten.id ? { ...k, name: kollektionName } : k)
       setKollektionen(neu)
       await localforage.setItem('kollektionen', neu)
-      toast.success('Kollektion aktualisiert! 🌸')
     } else {
       const neu = [...kollektionen, { id: Date.now(), name: kollektionName, outfitIds: [] }]
       setKollektionen(neu)
       await localforage.setItem('kollektionen', neu)
-      toast.success('Kollektion erstellt! 🌸')
     }
     setKollektionFormOffen(false)
     setKollektionBearbeiten(null)
@@ -138,18 +141,18 @@ function App() {
       <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
         <span>Kollektion wirklich löschen?</span>
         <div style={{display:'flex', gap:'8px'}}>
-          <button onClick={() => { toast.dismiss(t.id); toast.remove(t.id) }} style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Abbrechen</button>
+          <button onClick={() => { toast.dismiss(t.id); toast.remove(t.id); }} style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Abbrechen</button>
           <button onClick={async () => {
             toast.dismiss(t.id)
             toast.remove(t.id)
             const neu = kollektionen.filter(k => k.id !== id)
             setKollektionen(neu)
             await localforage.setItem('kollektionen', neu)
-            toast('Gelöscht', { icon: <Trash2 size={16} color="#e8789e" /> })
+            // no toast
           }} style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Löschen</button>
         </div>
       </div>
-    ), { duration: 10000 })
+    ))
   }
 
   async function handleAddOutfitToKollektion(kollektionId, outfitId) {
@@ -162,7 +165,6 @@ function App() {
     })
     setKollektionen(neu)
     await localforage.setItem('kollektionen', neu)
-    toast.success('Outfit hinzugefügt! ✨')
   }
 
   async function handleRemoveOutfitFromKollektion(kollektionId, outfitId) {
@@ -173,7 +175,6 @@ function App() {
     })
     setKollektionen(neu)
     await localforage.setItem('kollektionen', neu)
-    toast('Gelöscht', { icon: <Trash2 size={16} color="#e8789e" /> })
   }
 
   function handleDragEnd(event) {

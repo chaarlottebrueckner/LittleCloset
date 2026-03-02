@@ -44,14 +44,8 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
 
   function handleSubmit() {
     if (!vorschau) {
-      toast.error('Bitte ein Foto hinzufügen!')
       return
     }
-    if (wetter.length === 0) {
-      toast.error('Bitte mindestens eine Jahreszeit wählen!')
-      return
-    }
-
     if (foto) {
       const reader = new FileReader()
       reader.onloadend = () => {
@@ -122,7 +116,7 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Wetter</label>
+          <label className="form-label">Wetter (optional)</label>
           <div className="chip-group">
             {WETTER.map(w => (
               <button
