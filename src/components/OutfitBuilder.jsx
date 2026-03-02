@@ -8,22 +8,13 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
   const [aktivKategorie, setAktivKategorie] = useState('Oberteil')
 
   function handleSelect(item) {
-    if (item.kategorie === 'Accessoire') {
-      const istAusgewaehlt = auswahl.find(a => a.id === item.id)
-      if (istAusgewaehlt) {
-        setAuswahl(auswahl.filter(a => a.id !== item.id))
-      } else {
-        setAuswahl([...auswahl, item])
-      }
-    } else {
-      const istAusgewaehlt = auswahl.find(a => a.id === item.id)
-      if (istAusgewaehlt) {
-        setAuswahl(auswahl.filter(a => a.id !== item.id))
-      } else {
-        setAuswahl([...auswahl.filter(a => a.kategorie !== item.kategorie), item])
-      }
-    }
+  const istAusgewaehlt = auswahl.find(a => a.id === item.id)
+  if (istAusgewaehlt) {
+    setAuswahl(auswahl.filter(a => a.id !== item.id))
+  } else {
+    setAuswahl([...auswahl, item])
   }
+}
 
   function isSelected(item) {
     return !!auswahl.find(a => a.id === item.id)
