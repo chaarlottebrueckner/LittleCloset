@@ -55,10 +55,19 @@ function App() {
   }
 
   async function handleDeleteKleidung(id) {
-    ask('Kleidungsstück wirklich löschen?', async () => {
-      const neu = kleidung.filter(item => item.id !== id)
-      setKleidung(neu)
-      await localforage.setItem('kleidung', neu)
+    ask('Kleidungsstück wirklich löschen? Alle Outfits mit diesem Teil werden ebenfalls gelöscht.', async () => {
+      const neueKleidung = kleidung.filter(item => item.id !== id)
+      const neueOutfits = outfits.filter(o => !o.items.some(item => item.id === id))
+      const neueKollektionen = kollektionen.map(k => ({
+        ...k,
+        outfitIds: k.outfitIds.filter(oid => neueOutfits.find(o => o.id === oid))
+      }))
+      setKleidung(neueKleidung)
+      setOutfits(neueOutfits)
+      setKollektionen(neueKollektionen)
+      await localforage.setItem('kleidung', neueKleidung)
+      await localforage.setItem('outfits', neueOutfits)
+      await localforage.setItem('kollektionen', neueKollektionen)
     })
   }
 
@@ -70,12 +79,18 @@ function App() {
   }
 
   async function handleDeleteOutfit(id) {
-    ask('Outfit wirklich löschen?', async () => {
-      const neu = kleidung.filter(item => item.id !== id)
-      setKleidung(neu)
-      await localforage.setItem('kleidung', neu)
-    })
-  }
+  ask('Outfit wirklich löschen?', async () => {
+    const neueOutfits = outfits.filter(o => o.id !== id)
+    const neueKollektionen = kollektionen.map(k => ({
+      ...k,
+      outfitIds: k.outfitIds.filter(oid => oid !== id)
+    }))
+    setOutfits(neueOutfits)
+    setKollektionen(neueKollektionen)
+    await localforage.setItem('outfits', neueOutfits)
+    await localforage.setItem('kollektionen', neueKollektionen)
+  })
+}
 
   async function handleEditKleidung(item) {
     const neu = kleidung.map(k => k.id === item.id ? item : k)
@@ -169,7 +184,7 @@ function App() {
   })
 
   const aktiveFilter = (filterKategorie ? 1 : 0) + (filterWetter ? 1 : 0)
-
+  console.log('outfits in App:', outfits)
   return (
     <>
     {confirm && (
@@ -390,6 +405,7 @@ function App() {
                 <KollektionKarte
                   key={k.id}
                   kollektion={k}
+                  outfits={outfits}
                   onClick={() => setAktiveKollektion(k)}
                   onDelete={handleDeleteKollektion}
                   onEdit={(k) => { setAktiveKollektion(k) }}

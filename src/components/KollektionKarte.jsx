@@ -1,16 +1,16 @@
 import { Pencil, Trash2 } from 'lucide-react'
 
-function KollektionKarte({ kollektion, onClick, onDelete, onEdit }) {
-  const coverFoto = kollektion.outfitIds?.length > 0 && kollektion.vorschau
-    ? kollektion.vorschau
-    : null
+function KollektionKarte({ kollektion, outfits = [], onClick, onDelete, onEdit }) {
+  const kollektionOutfits = outfits.filter(o => kollektion.outfitIds?.includes(o.id))
+  console.log('kollektion:', kollektion, 'outfits:', outfits)
+  const fotos = kollektionOutfits
+    .flatMap(o => o.items.map(item => item.foto))
+    .slice(0, 4)
 
   return (
     <div className="kollektion-karte" onClick={onClick}>
       <div className="kollektion-cover">
-        {coverFoto ? (
-          <img src={coverFoto} alt={kollektion.name} className="kollektion-cover-img" />
-        ) : (
+        {fotos.length === 0 ? (
           <div className="kollektion-cover-leer">
             <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
               <circle cx="20" cy="20" r="20" fill="#fde8f0"/>
@@ -18,6 +18,14 @@ function KollektionKarte({ kollektion, onClick, onDelete, onEdit }) {
               <path d="M10 28 L30 28" stroke="#e8789e" strokeWidth="2" strokeLinecap="round"/>
               <path d="M17 14 L17 11 Q17 10 18 10 L22 10 Q23 10 23 11 L23 14" stroke="#e8789e" strokeWidth="2" fill="none"/>
             </svg>
+          </div>
+        ) : fotos.length === 1 ? (
+          <img src={fotos[0]} alt="" className="kollektion-cover-img" />
+        ) : (
+          <div className="kollektion-collage">
+            {fotos.map((foto, i) => (
+              <img key={i} src={foto} alt="" className="kollektion-collage-foto" />
+            ))}
           </div>
         )}
         <div className="kollektion-actions" onClick={e => e.stopPropagation()}>

@@ -745,3 +745,51 @@ body {
   padding-top: 24px;
   border-top: 1px solid var(--border);
 }
+
+/* Outfit Detail */
+.outfit-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.outfit-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.outfit-detail-foto {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+
+.outfit-detail-typ {
+  font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+
+.outfit-detail-kategorie {
+  font-size: 0.75rem;
+  color: var(--text-light);
+}
+
+/* Kollektions Collage */
+.kollektion-collage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.kollektion-collage-foto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import toast from 'react-hot-toast'
 
-const KATEGORIEN = ['Oberteil', 'Unterteil', 'Ganzkörper', 'Schuhe', 'Accessoire']
+const KATEGORIEN = ['Oberteil', 'Unterteil', 'Ganzkörper', 'Jacken & Cardigans','Schuhe', 'Accessoire']
 
 function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
   const [auswahl, setAuswahl] = useState(bearbeiten?.items || [])
