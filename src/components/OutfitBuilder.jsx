@@ -32,7 +32,7 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
   )
 
   onSave({
-    id: Date.now(),
+    id: bearbeiten?.id || Date.now(),
     items: auswahl,
     wetter: outfitWetter,
   })

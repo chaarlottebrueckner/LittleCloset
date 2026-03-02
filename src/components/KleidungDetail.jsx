@@ -1,30 +1,38 @@
-import { X, Plus } from 'lucide-react'
-import { Sun, Leaf, Snowflake } from 'lucide-react'
+import { X, Plus, Sun, Leaf, Snowflake, Pencil, Trash2 } from 'lucide-react'
 
-function KleidungDetail({ item, outfits, onClose, onOutfitErstellen }) {
+function KleidungDetail({ item, outfits, onClose, onOutfitErstellen, onEdit, onDelete }) {
   const itemOutfits = outfits.filter(o => o.items.some(i => i.id === item.id))
 
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
 
+        <div className="outfit-detail-header">
+          <div style={{display:'flex', gap:'6px', flexWrap:'wrap'}}>
+            {item.wetter?.map(w => (
+              <span key={w} className="chip chip-active" style={{padding:'4px 12px', fontSize:'0.78rem'}}>
+                {w === 'Sommer' && <Sun size={12} />}
+                {w === 'Übergang' && <Leaf size={12} />}
+                {w === 'Winter' && <Snowflake size={12} />}
+                {w}
+              </span>
+            ))}
+          </div>
+          <div style={{display:'flex', gap:'8px'}}>
+            <button className="action-btn" onClick={() => { onEdit(item); onClose() }}>
+              <Pencil size={14} />
+            </button>
+            <button className="action-btn" onClick={() => { onDelete(item.id); onClose() }}>
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+
         <img src={item.foto} alt={item.typ} className="kleidung-detail-foto" />
 
         <div className="kleidung-detail-info">
           <span className="kleidung-detail-typ">{item.typ}</span>
           <span className="kleidung-detail-kategorie">{item.kategorie}</span>
-          {item.wetter?.length > 0 && (
-            <div style={{display:'flex', gap:'6px', marginTop:'6px'}}>
-              {item.wetter.map(w => (
-                <span key={w} className="chip chip-active" style={{padding:'4px 12px', fontSize:'0.78rem'}}>
-                  {w === 'Sommer' && <Sun size={12} />}
-                  {w === 'Übergang' && <Leaf size={12} />}
-                  {w === 'Winter' && <Snowflake size={12} />}
-                  {w}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         {itemOutfits.length > 0 && (
@@ -59,7 +67,6 @@ function KleidungDetail({ item, outfits, onClose, onOutfitErstellen }) {
           <X size={16} style={{display:'inline', marginRight:'6px', verticalAlign:'middle'}}/>
           Schließen
         </button>
-
       </div>
     </div>
   )
