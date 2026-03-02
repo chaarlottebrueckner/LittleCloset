@@ -92,23 +92,26 @@ function App() {
   }
 
   async function handleSaveKollektion() {
-    if (!kollektionName.trim()) {
-      toast.error('Bitte einen Namen eingeben!')
-      return
-    }
-    if (kollektionBearbeiten) {
-      const neu = kollektionen.map(k => k.id === kollektionBearbeiten.id ? { ...k, name: kollektionName } : k)
-      setKollektionen(neu)
-      await localforage.setItem('kollektionen', neu)
-    } else {
-      const neu = [...kollektionen, { id: Date.now(), name: kollektionName, outfitIds: [] }]
-      setKollektionen(neu)
-      await localforage.setItem('kollektionen', neu)
-    }
-    setKollektionFormOffen(false)
-    setKollektionBearbeiten(null)
-    setKollektionName('')
+  if (!kollektionName.trim()) {
+    toast.error('Bitte einen Namen eingeben!')
+    return
   }
+  if (kollektionBearbeiten) {
+    const neu = kollektionen.map(k => k.id === kollektionBearbeiten.id ? { ...k, name: kollektionName } : k)
+    setKollektionen(neu)
+    await localforage.setItem('kollektionen', neu)
+    setAktiveKollektion(kollektionBearbeiten)
+  } else {
+    const neueKollektion = { id: Date.now(), name: kollektionName, outfitIds: [] }
+    const neu = [...kollektionen, neueKollektion]
+    setKollektionen(neu)
+    await localforage.setItem('kollektionen', neu)
+    setAktiveKollektion(neueKollektion)
+  }
+  setKollektionFormOffen(false)
+  setKollektionBearbeiten(null)
+  setKollektionName('')
+}
 
   async function handleDeleteKollektion(id) {
     ask('Kollektion wirklich löschen?', async () => {
@@ -139,6 +142,13 @@ function App() {
     setKollektionen(neu)
     await localforage.setItem('kollektionen', neu)
   }
+
+  async function handleRenameKollektion(id, name) {
+  const neu = kollektionen.map(k => k.id === id ? { ...k, name } : k)
+  setKollektionen(neu)
+  await localforage.setItem('kollektionen', neu)
+  toast.success('Name gespeichert! 🌸')
+}
 
   function handleDragEnd(event) {
     const { active, over } = event
@@ -382,7 +392,7 @@ function App() {
                   kollektion={k}
                   onClick={() => setAktiveKollektion(k)}
                   onDelete={handleDeleteKollektion}
-                  onEdit={(k) => { setKollektionBearbeiten(k); setKollektionName(k.name); setKollektionFormOffen(true) }}
+                  onEdit={(k) => { setAktiveKollektion(k) }}
                 />
               ))}
             </div>
@@ -397,7 +407,8 @@ function App() {
           onBack={() => setAktiveKollektion(null)}
           onAddOutfit={handleAddOutfitToKollektion}
           onRemoveOutfit={handleRemoveOutfitFromKollektion}
-        />
+          onRename={handleRenameKollektion}
+/>
       )}
 
       {kollektionFormOffen && (
