@@ -1,23 +1,34 @@
-import { X, Sun, Leaf, Snowflake } from 'lucide-react'
+import { X, Pencil, Trash2, Sun, Leaf, Snowflake } from 'lucide-react'
 
-function OutfitDetail({ outfit, onClose }) {
+function OutfitDetail({ outfit, onClose, onEdit, onDelete }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2 className="modal-title">Outfit</h2>
 
-        {outfit.wetter?.length > 0 && (
-          <div style={{display:'flex', gap:'6px', marginBottom:'16px'}}>
-            {outfit.wetter.map(w => (
-              <span key={w} className="chip chip-active" style={{padding:'4px 12px', fontSize:'0.78rem'}}>
-                {w === 'Sommer' && <Sun size={12} />}
-                {w === 'Übergang' && <Leaf size={12} />}
-                {w === 'Winter' && <Snowflake size={12} />}
-                {w}
-              </span>
-            ))}
+        <div className="outfit-detail-header">
+          {outfit.wetter?.length > 0 ? (
+            <div style={{display:'flex', gap:'6px', flexWrap:'wrap'}}>
+              {outfit.wetter.map(w => (
+                <span key={w} className="chip chip-active" style={{padding:'4px 12px', fontSize:'0.78rem'}}>
+                  {w === 'Sommer' && <Sun size={12} />}
+                  {w === 'Übergang' && <Leaf size={12} />}
+                  {w === 'Winter' && <Snowflake size={12} />}
+                  {w}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <span style={{color:'var(--text-light)', fontSize:'0.85rem'}}>Kein Wetter angegeben</span>
+          )}
+          <div style={{display:'flex', gap:'8px'}}>
+            <button className="action-btn" onClick={() => { onEdit(outfit); onClose() }}>
+              <Pencil size={14} />
+            </button>
+            <button className="action-btn" onClick={() => { onDelete(outfit.id); onClose() }}>
+              <Trash2 size={14} />
+            </button>
           </div>
-        )}
+        </div>
 
         <div className="outfit-detail-grid">
           {outfit.items.map(item => (

@@ -803,3 +803,44 @@ body {
 .outfit-selected-overlay {
   background: rgba(232, 120, 158, 0.6) !important;
 }
+
+/* Kleidung Detail */
+.kleidung-detail-foto {
+  width: 100%;
+  max-height: 280px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.kleidung-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.kleidung-detail-typ {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--brown);
+}
+
+.kleidung-detail-kategorie {
+  font-size: 0.85rem;
+  color: var(--text-light);
+}
+
+.kleidung-detail-outfits {
+  margin-bottom: 8px;
+}
+
+.outfit-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 8px;
+}

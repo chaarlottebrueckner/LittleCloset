@@ -24,7 +24,7 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
   }
 
   function handleHinzufuegen() {
-    ausgewaehlt.forEach(id => onAddOutfit(kollektion.id, id))
+    onAddOutfit(kollektion.id, ausgewaehlt)
     setAusgewaehlt([])
     setOutfitsOffen(false)
   }

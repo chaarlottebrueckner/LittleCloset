@@ -10,6 +10,9 @@ import OutfitKarte from './components/OutfitKarte'
 import KollektionKarte from './components/KollektionKarte'
 import KollektionDetail from './components/KollektionDetail'
 import ConfirmDialog from './components/ConfirmDialog'
+import KleidungDetail from './components/KleidungDetail'
+
+
 const KATEGORIEN = ['Oberteil', 'Jacken & Cardigans', 'Unterteil', 'Ganzkörper', 'Schuhe', 'Accessoire']
 const WETTER = [
   { label: 'Sommer', icon: <Sun size={14} /> },
@@ -35,7 +38,8 @@ function App() {
   const [kollektionFormOffen, setKollektionFormOffen] = useState(false)
   const [kollektionBearbeiten, setKollektionBearbeiten] = useState(null)
   const [kollektionName, setKollektionName] = useState('')
-  const [confirm, setConfirm] = useState(null) // {message, action}
+  const [confirm, setConfirm] = useState(null) 
+  const [detailItem, setDetailItem] = useState(null)
 
   function ask(message, action) {
     setConfirm({ message, action })
@@ -48,7 +52,7 @@ function App() {
   }, [])
 
   async function handleSaveKleidung(item) {
-    const neu = [...kleidung, item]
+    const neu = [item, ...kleidung]
     setKleidung(neu)
     await localforage.setItem('kleidung', neu)
     setFormOffen(false)
@@ -72,7 +76,7 @@ function App() {
   }
 
   async function handleSaveOutfit(outfit) {
-    const neu = [...outfits, outfit]
+    const neu = [outfit, ...outfits]
     setOutfits(neu)
     await localforage.setItem('outfits', neu)
     setOutfitBuilderOffen(false)
@@ -118,7 +122,7 @@ function App() {
     setAktiveKollektion(kollektionBearbeiten)
   } else {
     const neueKollektion = { id: Date.now(), name: kollektionName, outfitIds: [] }
-    const neu = [...kollektionen, neueKollektion]
+    const neu = [neueKollektion, ...kollektionen]
     setKollektionen(neu)
     await localforage.setItem('kollektionen', neu)
     setAktiveKollektion(neueKollektion)
@@ -136,16 +140,18 @@ function App() {
     })
   }
 
-  async function handleAddOutfitToKollektion(kollektionId, outfitId) {
+  async function handleAddOutfitToKollektion(kollektionId, outfitIds) {
+    const ids = Array.isArray(outfitIds) ? outfitIds : [outfitIds]
     const neu = kollektionen.map(k => {
       if (k.id !== kollektionId) return k
-      const outfitIds = [...(k.outfitIds || []), outfitId]
-      const vorschauOutfit = outfits.find(o => o.id === outfitId)
-      const vorschau = vorschauOutfit?.items?.[0]?.foto || k.vorschau
-      return { ...k, outfitIds, vorschau: k.vorschau || vorschau }
+      const neueIds = [...(k.outfitIds || []), ...ids.filter(id => !k.outfitIds?.includes(id))]
+      const vorschauOutfit = outfits.find(o => o.id === ids[0])
+      const vorschau = vorschauOutfit?.items?.[0]?.foto
+      return { ...k, outfitIds: neueIds, vorschau: k.vorschau || vorschau }
     })
     setKollektionen(neu)
     await localforage.setItem('kollektionen', neu)
+    toast.success('Outfits hinzugefügt! ✨')
   }
 
   async function handleRemoveOutfitFromKollektion(kollektionId, outfitId) {
@@ -299,10 +305,10 @@ function App() {
               </div>
             ) : (
               gefilterteKleidung.map(item => (
-                <div key={item.id} className="kleidung-karte">
+                <div key={item.id} className="kleidung-karte" onClick={() => setDetailItem(item)}>
                   <div className="kleidung-foto-wrapper">
                     <img src={item.foto} alt={item.typ} className="kleidung-foto" />
-                    <div className="karte-actions">
+                    <div className="karte-actions" onClick={e => e.stopPropagation()}>
                       <button className="action-btn" onClick={() => setBearbeitenItem(item)}>
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                           <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -476,6 +482,18 @@ function App() {
       )}
       {bearbeitenOutfit && (
         <OutfitBuilder kleidung={kleidung} onSave={handleEditOutfit} onClose={() => setBearbeitenOutfit(null)} bearbeiten={bearbeitenOutfit} />
+      )}
+      {detailItem && (
+        <KleidungDetail
+          item={detailItem}
+          outfits={outfits}
+          onClose={() => setDetailItem(null)}
+          onOutfitErstellen={() => {
+            setDetailItem(null)
+            setTab('outfits')
+            setOutfitBuilderOffen(true)
+          }}
+        />
       )}
     </div>
     </>
