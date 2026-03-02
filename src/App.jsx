@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import localforage from 'localforage'
-// toast imported but Toaster removed; calls will have no effect
 import toast from 'react-hot-toast'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy, arrayMove } from '@dnd-kit/sortable'
@@ -10,7 +9,7 @@ import OutfitBuilder from './components/OutfitBuilder'
 import OutfitKarte from './components/OutfitKarte'
 import KollektionKarte from './components/KollektionKarte'
 import KollektionDetail from './components/KollektionDetail'
-
+import ConfirmDialog from './components/ConfirmDialog'
 const KATEGORIEN = ['Oberteil', 'Jacken & Cardigans', 'Unterteil', 'Ganzkörper', 'Schuhe', 'Accessoire']
 const WETTER = [
   { label: 'Sommer', icon: <Sun size={14} /> },
@@ -36,6 +35,11 @@ function App() {
   const [kollektionFormOffen, setKollektionFormOffen] = useState(false)
   const [kollektionBearbeiten, setKollektionBearbeiten] = useState(null)
   const [kollektionName, setKollektionName] = useState('')
+  const [confirm, setConfirm] = useState(null) // {message, action}
+
+  function ask(message, action) {
+    setConfirm({ message, action })
+  }
 
   useEffect(() => {
     localforage.getItem('kleidung').then(data => { if (data) setKleidung(data) })
@@ -51,26 +55,11 @@ function App() {
   }
 
   async function handleDeleteKleidung(id) {
-    toast((t) => (
-      <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
-        <span>Kleidungsstück wirklich löschen?</span>
-        <div style={{display:'flex', gap:'8px'}}>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}
-          >Abbrechen</button>
-          <button
-            onClick={async () => {
-              toast.dismiss(t.id)
-              const neu = kleidung.filter(item => item.id !== id)
-              setKleidung(neu)
-              await localforage.setItem('kleidung', neu)
-            }}
-            style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}
-          >Löschen</button>
-        </div>
-      </div>
-    ))
+    ask('Kleidungsstück wirklich löschen?', async () => {
+      const neu = kleidung.filter(item => item.id !== id)
+      setKleidung(neu)
+      await localforage.setItem('kleidung', neu)
+    })
   }
 
   async function handleSaveOutfit(outfit) {
@@ -81,27 +70,11 @@ function App() {
   }
 
   async function handleDeleteOutfit(id) {
-    toast((t) => (
-      <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
-        <span>Outfit wirklich löschen?</span>
-        <div style={{display:'flex', gap:'8px'}}>
-          <button
-            onClick={() => toast.dismiss(t.id)}
-            style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}
-          >Abbrechen</button>
-          <button
-            onClick={async () => {
-              toast.dismiss(t.id)
-              const neu = kleidung.filter(item => item.id !== id)
-              setKleidung(neu)
-              await localforage.setItem('kleidung', neu)
-              // no toast
-            }}
-            style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}
-          >Löschen</button>
-        </div>
-      </div>
-    ))
+    ask('Outfit wirklich löschen?', async () => {
+      const neu = kleidung.filter(item => item.id !== id)
+      setKleidung(neu)
+      await localforage.setItem('kleidung', neu)
+    })
   }
 
   async function handleEditKleidung(item) {
@@ -120,6 +93,7 @@ function App() {
 
   async function handleSaveKollektion() {
     if (!kollektionName.trim()) {
+      toast.error('Bitte einen Namen eingeben!')
       return
     }
     if (kollektionBearbeiten) {
@@ -137,22 +111,11 @@ function App() {
   }
 
   async function handleDeleteKollektion(id) {
-    toast((t) => (
-      <div style={{display:'flex', flexDirection:'column', gap:'8px'}}>
-        <span>Kollektion wirklich löschen?</span>
-        <div style={{display:'flex', gap:'8px'}}>
-          <button onClick={() => { toast.dismiss(t.id); toast.remove(t.id); }} style={{padding:'6px 12px', borderRadius:'20px', border:'1px solid #f5d5e0', background:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Abbrechen</button>
-          <button onClick={async () => {
-            toast.dismiss(t.id)
-            toast.remove(t.id)
-            const neu = kollektionen.filter(k => k.id !== id)
-            setKollektionen(neu)
-            await localforage.setItem('kollektionen', neu)
-            // no toast
-          }} style={{padding:'6px 12px', borderRadius:'20px', border:'none', background:'#e8789e', color:'white', cursor:'pointer', fontFamily:'DM Sans'}}>Löschen</button>
-        </div>
-      </div>
-    ))
+    ask('Kollektion wirklich löschen?', async () => {
+      const neu = kollektionen.filter(k => k.id !== id)
+      setKollektionen(neu)
+      await localforage.setItem('kollektionen', neu)
+    })
   }
 
   async function handleAddOutfitToKollektion(kollektionId, outfitId) {
@@ -198,6 +161,21 @@ function App() {
   const aktiveFilter = (filterKategorie ? 1 : 0) + (filterWetter ? 1 : 0)
 
   return (
+    <>
+    {confirm && (
+        <ConfirmDialog
+          message={confirm.message}
+          onConfirm={() => {
+            const res = confirm.action()
+            if (res && res.then) {
+              res.then(() => setConfirm(null))
+            } else {
+              setConfirm(null)
+            }
+          }}
+          onCancel={() => setConfirm(null)}
+        />
+      )}
     <div className="container">
       <div className="top-bar">
         <h1 className="header">Little<span>Closet</span></h1>
@@ -473,6 +451,7 @@ function App() {
         <OutfitBuilder kleidung={kleidung} onSave={handleEditOutfit} onClose={() => setBearbeitenOutfit(null)} bearbeiten={bearbeitenOutfit} />
       )}
     </div>
+    </>
   )
 }
 

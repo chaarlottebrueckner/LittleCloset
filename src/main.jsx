@@ -7,6 +7,6 @@ import App from './App.jsx'
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App />
-    <Toaster position="top-center" />
+    <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
   </StrictMode>
 )

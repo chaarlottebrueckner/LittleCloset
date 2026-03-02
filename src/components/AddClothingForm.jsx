@@ -44,6 +44,7 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
 
   function handleSubmit() {
     if (!vorschau) {
+      toast.error('Bitte ein Foto hinzufügen!')
       return
     }
     if (foto) {

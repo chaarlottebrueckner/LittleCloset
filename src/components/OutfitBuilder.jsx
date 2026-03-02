@@ -31,7 +31,7 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
 
   function handleSubmit() {
   if (auswahl.length === 0) {
-    // toast.error('Bitte mindestens ein Kleidungsstück auswählen!')
+    toast.error('Bitte mindestens ein Kleidungsstück auswählen!')
     return
   }
 
