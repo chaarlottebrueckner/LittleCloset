@@ -793,3 +793,13 @@ body {
   height: 100%;
   object-fit: cover;
 }
+
+.kollektion-outfit-selected {
+  cursor: pointer;
+  border: 2px solid var(--rose-deep);
+  border-radius: calc(var(--radius) + 2px);
+}
+
+.outfit-selected-overlay {
+  background: rgba(232, 120, 158, 0.6) !important;
+}

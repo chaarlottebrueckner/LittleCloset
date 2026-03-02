@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 
 function KollektionKarte({ kollektion, outfits = [], onClick, onDelete, onEdit }) {
   const kollektionOutfits = outfits.filter(o => kollektion.outfitIds?.includes(o.id))
@@ -29,9 +29,6 @@ function KollektionKarte({ kollektion, outfits = [], onClick, onDelete, onEdit }
           </div>
         )}
         <div className="kollektion-actions" onClick={e => e.stopPropagation()}>
-          <button className="action-btn" onClick={() => onEdit(kollektion)}>
-            <Pencil size={13} />
-          </button>
           <button className="action-btn" onClick={() => onDelete(kollektion.id)}>
             <Trash2 size={13} />
           </button>

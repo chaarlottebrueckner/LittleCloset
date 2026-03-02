@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ArrowLeft, Plus, Trash2, Pencil } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Pencil, Check } from 'lucide-react'
 
 function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOutfit, onRename }) {
   const [outfitsOffen, setOutfitsOffen] = useState(false)
   const [nameBearbeiten, setNameBearbeiten] = useState(false)
   const [neuerName, setNeuerName] = useState(kollektion.name)
+  const [ausgewaehlt, setAusgewaehlt] = useState([])
 
   const kollektionOutfits = outfits.filter(o => kollektion.outfitIds?.includes(o.id))
   const verfuegbareOutfits = outfits.filter(o => !kollektion.outfitIds?.includes(o.id))
@@ -14,6 +15,18 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
       onRename(kollektion.id, neuerName.trim())
       setNameBearbeiten(false)
     }
+  }
+
+  function toggleAuswahl(id) {
+    setAusgewaehlt(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    )
+  }
+
+  function handleHinzufuegen() {
+    ausgewaehlt.forEach(id => onAddOutfit(kollektion.id, id))
+    setAusgewaehlt([])
+    setOutfitsOffen(false)
   }
 
   return (
@@ -60,35 +73,46 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
         </div>
       ) : (
         <>
-          <button className="btn btn-primary btn-full" onClick={() => setOutfitsOffen(!outfitsOffen)}>
+          <button className="btn btn-primary btn-full" onClick={() => { setOutfitsOffen(!outfitsOffen); setAusgewaehlt([]) }}>
             <Plus size={18} style={{display:'inline', marginRight:'6px', verticalAlign:'middle'}}/>
-            {outfitsOffen ? 'Fertig' : 'Outfit hinzufügen'}
+            {outfitsOffen ? 'Abbrechen' : 'Outfits hinzufügen'}
           </button>
 
           {outfitsOffen && (
             <div className="filter-panel" style={{marginBottom:'16px'}}>
-              <p className="form-label" style={{marginBottom:'12px'}}>Outfit auswählen</p>
+              <p className="form-label" style={{marginBottom:'12px'}}>Outfits auswählen</p>
               {verfuegbareOutfits.length === 0 ? (
                 <p style={{color:'var(--text-light)', fontSize:'0.9rem'}}>Alle Outfits sind bereits in dieser Kollektion.</p>
               ) : (
-                <div className="kollektion-outfits">
-                  {verfuegbareOutfits.map(outfit => (
-                    <div
-                      key={outfit.id}
-                      className="kollektion-outfit-karte kollektion-outfit-add"
-                      onClick={() => { onAddOutfit(kollektion.id, outfit.id); setOutfitsOffen(false) }}
-                    >
-                      <div className="outfit-karte-grid">
-                        {outfit.items.map(item => (
-                          <img key={item.id} src={item.foto} alt={item.typ} className="outfit-karte-foto" />
-                        ))}
+                <>
+                  <div className="kollektion-outfits">
+                    {verfuegbareOutfits.map(outfit => (
+                      <div
+                        key={outfit.id}
+                        className={`kollektion-outfit-karte ${ausgewaehlt.includes(outfit.id) ? 'kollektion-outfit-selected' : 'kollektion-outfit-add'}`}
+                        onClick={() => toggleAuswahl(outfit.id)}
+                      >
+                        <div className="outfit-karte-grid">
+                          {outfit.items.map(item => (
+                            <img key={item.id} src={item.foto} alt={item.typ} className="outfit-karte-foto" />
+                          ))}
+                        </div>
+                        <div className={`outfit-add-overlay ${ausgewaehlt.includes(outfit.id) ? 'outfit-selected-overlay' : ''}`}>
+                          {ausgewaehlt.includes(outfit.id)
+                            ? <Check size={24} color="white" />
+                            : <Plus size={24} color="white" />
+                          }
+                        </div>
                       </div>
-                      <div className="outfit-add-overlay">
-                        <Plus size={24} color="white" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                  {ausgewaehlt.length > 0 && (
+                    <button className="btn btn-primary btn-full" style={{marginTop:'12px'}} onClick={handleHinzufuegen}>
+                      <Check size={18} style={{display:'inline', marginRight:'6px', verticalAlign:'middle'}}/>
+                      {ausgewaehlt.length} Outfit{ausgewaehlt.length > 1 ? 's' : ''} hinzufügen
+                    </button>
+                  )}
+                </>
               )}
             </div>
           )}
