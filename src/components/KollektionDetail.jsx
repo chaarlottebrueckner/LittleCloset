@@ -1,11 +1,16 @@
 import { useState } from 'react'
-import { ArrowLeft, Plus, Trash2, Pencil, Check } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Pencil, Check, Sun, Leaf, Snowflake, SlidersHorizontal } from 'lucide-react'
+
+const STYLE_TAGS = ['Casual', 'Cozy', 'Ausgehen', 'Sport', 'Business', 'Festlich']
 
 function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOutfit, onRename }) {
   const [outfitsOffen, setOutfitsOffen] = useState(false)
   const [nameBearbeiten, setNameBearbeiten] = useState(false)
   const [neuerName, setNeuerName] = useState(kollektion.name)
   const [ausgewaehlt, setAusgewaehlt] = useState([])
+  const [filterWetter, setFilterWetter] = useState(null)
+  const [filterStyle, setFilterStyle] = useState(null)
+  const [filterOffen, setFilterOffen] = useState(false)
 
   const kollektionOutfits = outfits.filter(o => kollektion.outfitIds?.includes(o.id))
   const verfuegbareOutfits = outfits.filter(o => !kollektion.outfitIds?.includes(o.id))
@@ -29,6 +34,10 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
     setOutfitsOffen(false)
   }
 
+  const gefilterteOutfits = kollektionOutfits
+    .filter(o => !filterWetter || o.wetter?.includes(filterWetter))
+    .filter(o => !filterStyle || o.styleTags?.includes(filterStyle))
+
   return (
     <div>
       <div className="top-bar">
@@ -48,9 +57,18 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
         ) : (
           <h1 className="header" style={{fontSize:'1.4rem', flex:1, textAlign:'center'}}>{kollektion.name}</h1>
         )}
-        <button className="action-btn" onClick={() => setNameBearbeiten(!nameBearbeiten)}>
-          <Pencil size={15} />
-        </button>
+        <div style={{display:'flex', gap:'8px'}}>
+          <button
+            className={`filter-icon-btn ${filterWetter || filterStyle ? 'filter-aktiv' : ''}`}
+            onClick={() => setFilterOffen(!filterOffen)}
+          >
+            <SlidersHorizontal size={16} />
+            {(filterWetter ? 1 : 0) + (filterStyle ? 1 : 0) > 0 ? ` (${(filterWetter ? 1 : 0) + (filterStyle ? 1 : 0)})` : ''}
+          </button>
+          <button className="action-btn" onClick={() => setNameBearbeiten(!nameBearbeiten)}>
+            <Pencil size={15} />
+          </button>
+        </div>
       </div>
 
       {kollektionOutfits.length === 0 && !outfitsOffen ? (
@@ -117,23 +135,52 @@ function KollektionDetail({ kollektion, outfits, onBack, onAddOutfit, onRemoveOu
             </div>
           )}
 
-          <div className="kollektion-outfits">
-            {kollektionOutfits.map(outfit => (
-              <div key={outfit.id} className="kollektion-outfit-karte">
-                <div className="outfit-karte-grid">
-                  {outfit.items.map(item => (
-                    <img key={item.id} src={item.foto} alt={item.typ} className="outfit-karte-foto" />
-                  ))}
-                </div>
-                <button
-                  className="action-btn"
-                  style={{position:'absolute', top:'8px', right:'8px'}}
-                  onClick={() => onRemoveOutfit(kollektion.id, outfit.id)}
-                >
-                  <Trash2 size={13} />
-                </button>
+         {kollektionOutfits.length > 0 && filterOffen && (
+          <div className="filter-panel" style={{marginBottom:'16px'}}>
+            <div className="form-group">
+              <label className="form-label">Wetter</label>
+              <div className="chip-group">
+                <button className={`chip ${filterWetter === null ? 'chip-active' : ''}`} onClick={() => setFilterWetter(null)}>Alle</button>
+                <button className={`chip ${filterWetter === 'Sommer' ? 'chip-active' : ''}`} onClick={() => setFilterWetter('Sommer')}><Sun size={12}/> Sommer</button>
+                <button className={`chip ${filterWetter === 'Übergang' ? 'chip-active' : ''}`} onClick={() => setFilterWetter('Übergang')}><Leaf size={12}/> Übergang</button>
+                <button className={`chip ${filterWetter === 'Winter' ? 'chip-active' : ''}`} onClick={() => setFilterWetter('Winter')}><Snowflake size={12}/> Winter</button>
               </div>
-            ))}
+            </div>
+            <div className="form-group">
+              <label className="form-label">Style</label>
+              <div className="chip-group">
+                <button className={`chip ${filterStyle === null ? 'chip-active' : ''}`} onClick={() => setFilterStyle(null)}>Alle</button>
+                {STYLE_TAGS.map(tag => (
+                  <button key={tag} className={`chip ${filterStyle === tag ? 'chip-active' : ''}`} onClick={() => setFilterStyle(tag)}>{tag}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+          <div className="kollektion-outfits">
+            {gefilterteOutfits.length === 0 ? (
+              <p style={{color:'var(--text-light)', fontSize:'0.9rem', textAlign:'center', padding:'20px 0'}}>
+                Keine Outfits für diesen Filter.
+              </p>
+            ) : (
+              gefilterteOutfits.map(outfit => (
+                <div key={outfit.id} className="kollektion-outfit-karte">
+                  <div className="outfit-karte-grid">
+                    {outfit.items.map(item => (
+                      <img key={item.id} src={item.foto} alt={item.typ} className="outfit-karte-foto" />
+                    ))}
+                  </div>
+                  <button
+                    className="action-btn"
+                    style={{position:'absolute', top:'8px', right:'8px'}}
+                    onClick={() => onRemoveOutfit(kollektion.id, outfit.id)}
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </>
       )}

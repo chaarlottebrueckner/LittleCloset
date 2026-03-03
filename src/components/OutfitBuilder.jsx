@@ -1,42 +1,53 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import toast from 'react-hot-toast'
 
-const KATEGORIEN = ['Oberteil', 'Unterteil', 'Ganzkörper', 'Jacken & Cardigans','Schuhe', 'Accessoire']
+const KATEGORIEN = ['Oberteil', 'Jacken & Cardigans', 'Unterteil', 'Ganzkörper', 'Schuhe', 'Accessoire']
+const STYLE_TAGS = ['Casual', 'Cozy', 'Ausgehen', 'Sport', 'Business', 'Festlich']
 
 function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
   const [auswahl, setAuswahl] = useState(bearbeiten?.items || [])
   const [aktivKategorie, setAktivKategorie] = useState('Oberteil')
+  const [styleTags, setStyleTags] = useState(bearbeiten?.styleTags || [])
+
+  useEffect(() => {
+    if (auswahl.length === 0) return
+    const vorgeschlagen = STYLE_TAGS.filter(tag =>
+      auswahl.every(item => item.styleTags?.includes(tag))
+    )
+    setStyleTags(vorgeschlagen)
+  }, [auswahl])
 
   function handleSelect(item) {
-  const istAusgewaehlt = auswahl.find(a => a.id === item.id)
-  if (istAusgewaehlt) {
-    setAuswahl(auswahl.filter(a => a.id !== item.id))
-  } else {
-    setAuswahl([...auswahl, item])
+    const istAusgewaehlt = auswahl.find(a => a.id === item.id)
+    if (istAusgewaehlt) {
+      setAuswahl(auswahl.filter(a => a.id !== item.id))
+    } else {
+      setAuswahl([...auswahl, item])
+    }
   }
-}
 
   function isSelected(item) {
     return !!auswahl.find(a => a.id === item.id)
   }
 
   function handleSubmit() {
-  if (auswahl.length === 0) {
-    toast.error('Bitte mindestens ein Kleidungsstück auswählen!')
-    return
+    if (auswahl.length === 0) {
+      toast.error('Bitte mindestens ein Kleidungsstück auswählen!')
+      return
+    }
+
+    const wetterSaisons = ['Sommer', 'Übergang', 'Winter']
+    const outfitWetter = wetterSaisons.filter(saison =>
+      auswahl.every(item => item.wetter?.includes(saison))
+    )
+
+    onSave({
+      id: bearbeiten?.id || Date.now(),
+      items: auswahl,
+      wetter: outfitWetter,
+      styleTags,
+    })
   }
-
-  const wetterSaisons = ['Sommer', 'Übergang', 'Winter']
-  const outfitWetter = wetterSaisons.filter(saison =>
-    auswahl.every(item => item.wetter?.includes(saison))
-  )
-
-  onSave({
-    id: bearbeiten?.id || Date.now(),
-    items: auswahl,
-    wetter: outfitWetter,
-  })
-}
 
   const kleidungInKategorie = kleidung.filter(k => k.kategorie === aktivKategorie)
 
@@ -49,16 +60,10 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
           <label className="form-label">Kategorie</label>
           <div className="chip-group">
             {KATEGORIEN.map(k => (
-              <button
-                key={k}
-                onClick={() => setAktivKategorie(k)}
-                className={`chip ${aktivKategorie === k ? 'chip-active' : ''}`}
-              >
+              <button key={k} onClick={() => setAktivKategorie(k)} className={`chip ${aktivKategorie === k ? 'chip-active' : ''}`}>
                 {k}
                 {auswahl.filter(a => a.kategorie === k).length > 0 && (
-                  <span className="chip-badge">
-                    {auswahl.filter(a => a.kategorie === k).length}
-                  </span>
+                  <span className="chip-badge">{auswahl.filter(a => a.kategorie === k).length}</span>
                 )}
               </button>
             ))}
@@ -70,11 +75,7 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
             <p className="empty-text">Keine Kleidung in dieser Kategorie.</p>
           ) : (
             kleidungInKategorie.map(item => (
-              <div
-                key={item.id}
-                className={`outfit-item ${isSelected(item) ? 'outfit-item-selected' : ''}`}
-                onClick={() => handleSelect(item)}
-              >
+              <div key={item.id} className={`outfit-item ${isSelected(item) ? 'outfit-item-selected' : ''}`} onClick={() => handleSelect(item)}>
                 <img src={item.foto} alt={item.typ} className="outfit-item-foto" />
                 <span className="outfit-item-typ">{item.typ}</span>
                 {isSelected(item) && <div className="outfit-check">✓</div>}
@@ -93,6 +94,21 @@ function OutfitBuilder({ kleidung, onSave, onClose, bearbeiten }) {
             </div>
           </div>
         )}
+
+        <div className="form-group">
+          <label className="form-label">Style</label>
+          <div className="chip-group">
+            {STYLE_TAGS.map(tag => (
+              <button
+                key={tag}
+                onClick={() => setStyleTags(prev => prev.includes(tag) ? prev.filter(x => x !== tag) : [...prev, tag])}
+                className={`chip ${styleTags.includes(tag) ? 'chip-active' : ''}`}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="form-buttons">
           <button onClick={onClose} className="btn btn-secondary">Abbrechen</button>

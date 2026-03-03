@@ -40,6 +40,8 @@ function App() {
   const [kollektionName, setKollektionName] = useState('')
   const [confirm, setConfirm] = useState(null) 
   const [detailItem, setDetailItem] = useState(null)
+  const [filterStyleTag, setFilterStyleTag] = useState(null)
+  const [filterOutfitStyleTag, setFilterOutfitStyleTag] = useState(null)
 
   function ask(message, action) {
     setConfirm({ message, action })
@@ -186,10 +188,11 @@ function App() {
   const gefilterteKleidung = kleidung.filter(item => {
     if (filterKategorie && item.kategorie !== filterKategorie) return false
     if (filterWetter && !item.wetter?.includes(filterWetter)) return false
+    if (filterStyleTag && !item.styleTags?.includes(filterStyleTag)) return false
     return true
   })
 
-  const aktiveFilter = (filterKategorie ? 1 : 0) + (filterWetter ? 1 : 0)
+  const aktiveFilter = (filterKategorie ? 1 : 0) + (filterWetter ? 1 : 0) + (filterStyleTag ? 1 : 0)
   console.log('outfits in App:', outfits)
   return (
     <>
@@ -251,6 +254,15 @@ function App() {
               ))}
             </div>
           </div>
+          <div className="form-group">
+            <label className="form-label">Style</label>
+            <div className="chip-group">
+              <button className={`chip ${filterStyleTag === null ? 'chip-active' : ''}`} onClick={() => setFilterStyleTag(null)}>Alle</button>
+              {['Casual', 'Cozy', 'Ausgehen', 'Sport', 'Business', 'Festlich'].map(tag => (
+                <button key={tag} className={`chip ${filterStyleTag === tag ? 'chip-active' : ''}`} onClick={() => setFilterStyleTag(tag)}>{tag}</button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
@@ -267,9 +279,17 @@ function App() {
               ))}
             </div>
           </div>
+          <div className="form-group">
+            <label className="form-label">Style</label>
+            <div className="chip-group">
+              <button className={`chip ${filterOutfitStyleTag === null ? 'chip-active' : ''}`} onClick={() => setFilterOutfitStyleTag(null)}>Alle</button>
+              {['Casual', 'Cozy', 'Ausgehen', 'Sport', 'Business', 'Festlich'].map(tag => (
+                <button key={tag} className={`chip ${filterOutfitStyleTag === tag ? 'chip-active' : ''}`} onClick={() => setFilterOutfitStyleTag(tag)}>{tag}</button>
+              ))}
+            </div>
+          </div>
         </div>
       )}
-
       {tab === 'kleidung' && (
         <>
           <button className="btn btn-primary btn-full" onClick={() => setFormOffen(true)}>
@@ -359,6 +379,7 @@ function App() {
                 <SortableContext items={outfits.map(o => o.id)} strategy={verticalListSortingStrategy}>
                   {outfits
                     .filter(o => !filterOutfitWetter || o.wetter?.includes(filterOutfitWetter))
+                    .filter(o => !filterOutfitStyleTag || o.styleTags?.includes(filterOutfitStyleTag))
                     .map(outfit => (
                       <OutfitKarte key={outfit.id} outfit={outfit} onDelete={handleDeleteOutfit} onEdit={setBearbeitenOutfit} />
                     ))}

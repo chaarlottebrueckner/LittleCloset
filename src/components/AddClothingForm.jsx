@@ -17,10 +17,13 @@ const WETTER = [
   { label: 'Winter', icon: <Snowflake size={14} /> },
 ]
 
+const STYLE_TAGS = ['Casual', 'Cozy', 'Ausgehen', 'Sport', 'Business', 'Festlich']
+
 function AddClothingForm({ onSave, onClose, bearbeiten }) {
   const [kategorie, setKategorie] = useState(bearbeiten?.kategorie || 'Oberteil')
   const [typ, setTyp] = useState(bearbeiten?.typ || KATEGORIEN['Oberteil'][0])
   const [wetter, setWetter] = useState(bearbeiten?.wetter || [])
+  const [styleTags, setStyleTags] = useState(bearbeiten?.styleTags || [])
   const [foto, setFoto] = useState(null)
   const [vorschau, setVorschau] = useState(bearbeiten?.foto || null)
 
@@ -42,31 +45,32 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
     )
   }
 
+  function handleStyleTag(tag) {
+    setStyleTags(prev =>
+      prev.includes(tag) ? prev.filter(x => x !== tag) : [...prev, tag]
+    )
+  }
+
   function handleSubmit() {
     if (!vorschau) {
       toast.error('Bitte ein Foto hinzufügen!')
       return
     }
+
+    const data = {
+      id: bearbeiten?.id || Date.now(),
+      kategorie,
+      typ,
+      wetter,
+      styleTags,
+    }
+
     if (foto) {
       const reader = new FileReader()
-      reader.onloadend = () => {
-        onSave({
-          id: bearbeiten?.id || Date.now(),
-          kategorie,
-          typ,
-          wetter,
-          foto: reader.result,
-        })
-      }
+      reader.onloadend = () => onSave({ ...data, foto: reader.result })
       reader.readAsDataURL(foto)
     } else {
-      onSave({
-        id: bearbeiten?.id || Date.now(),
-        kategorie,
-        typ,
-        wetter,
-        foto: vorschau,
-      })
+      onSave({ ...data, foto: vorschau })
     }
   }
 
@@ -77,12 +81,7 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
 
         <div className="form-group">
           <label className="form-label">Foto</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFoto}
-            className="form-input"
-          />
+          <input type="file" accept="image/*" onChange={handleFoto} className="form-input" />
           {vorschau && <img src={vorschau} alt="Vorschau" className="foto-vorschau" />}
         </div>
 
@@ -90,13 +89,7 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
           <label className="form-label">Kategorie</label>
           <div className="chip-group">
             {Object.keys(KATEGORIEN).map(k => (
-              <button
-                key={k}
-                onClick={() => handleKategorie(k)}
-                className={`chip ${kategorie === k ? 'chip-active' : ''}`}
-              >
-                {k}
-              </button>
+              <button key={k} onClick={() => handleKategorie(k)} className={`chip ${kategorie === k ? 'chip-active' : ''}`}>{k}</button>
             ))}
           </div>
         </div>
@@ -105,13 +98,7 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
           <label className="form-label">Typ</label>
           <div className="chip-group">
             {KATEGORIEN[kategorie]?.map(t => (
-              <button
-                key={t}
-                onClick={() => setTyp(t)}
-                className={`chip ${typ === t ? 'chip-active' : ''}`}
-              >
-                {t}
-              </button>
+              <button key={t} onClick={() => setTyp(t)} className={`chip ${typ === t ? 'chip-active' : ''}`}>{t}</button>
             ))}
           </div>
         </div>
@@ -120,13 +107,18 @@ function AddClothingForm({ onSave, onClose, bearbeiten }) {
           <label className="form-label">Wetter (optional)</label>
           <div className="chip-group">
             {WETTER.map(w => (
-              <button
-                key={w.label}
-                onClick={() => handleWetter(w.label)}
-                className={`chip ${wetter.includes(w.label) ? 'chip-active' : ''}`}
-              >
+              <button key={w.label} onClick={() => handleWetter(w.label)} className={`chip ${wetter.includes(w.label) ? 'chip-active' : ''}`}>
                 {w.icon} {w.label}
               </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label className="form-label">Style (optional)</label>
+          <div className="chip-group">
+            {STYLE_TAGS.map(tag => (
+              <button key={tag} onClick={() => handleStyleTag(tag)} className={`chip ${styleTags.includes(tag) ? 'chip-active' : ''}`}>{tag}</button>
             ))}
           </div>
         </div>
